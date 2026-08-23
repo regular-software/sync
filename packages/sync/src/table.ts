@@ -1,8 +1,6 @@
 import type { SyncTable as SyncTableDefinition } from "@regular-sync/shared";
 import type { SyncStore } from "./store";
 
-export type MutateRow<Row> = (row: Row) => Promise<void>;
-
 export class SyncTable<Row extends Record<string, unknown>> {
   constructor(
     readonly definition: SyncTableDefinition,

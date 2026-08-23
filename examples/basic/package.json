@@ -16,12 +16,9 @@
     "@regular-sync/browser": "workspace:*",
     "@regular-sync/server": "workspace:*",
     "@regular-sync/shared": "workspace:*",
-    "@regular-sync/sqlite": "workspace:*",
-    "@regular-sync/indexeddb": "workspace:*",
     "@regular-sync/react-query": "workspace:*",
     "better-sqlite3": "catalog:",
     "@tailwindcss/vite": "^4.1.18",
-    "@tanstack/react-devtools": "latest",
     "@tanstack/react-query": "latest",
     "@tanstack/react-router": "latest",
     "@tanstack/react-router-ssr-query": "latest",
@@ -39,11 +36,5 @@
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
     "@types/better-sqlite3": "catalog:"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
   }
 }

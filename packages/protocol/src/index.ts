@@ -28,13 +28,6 @@ export type SyncResult = {
   deleted: DeletedRow[];
 };
 
-export type Mutation = {
-  tableName: string;
-  rowId: string;
-  operation: ChangeOperation;
-  run: () => void;
-};
-
 export type JsonPrimitive = string | number | boolean | null;
 
 export type JsonValue =
