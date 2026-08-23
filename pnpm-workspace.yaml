@@ -1,0 +1,11 @@
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+
+packages:
+  - "packages/*"
+  - "examples/*"
+
+catalog:
+  better-sqlite3: ^13.0.3
+  "@types/better-sqlite3": ^9.6.0

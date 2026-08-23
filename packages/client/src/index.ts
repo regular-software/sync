@@ -1,0 +1,10 @@
+export { SyncClientBuilder } from "./builder";
+export { SyncClient } from "./client";
+export type { Pull, SyncClientOptions } from "./client";
+export { createSyncClient } from "./create-client";
+export { defineTable } from "./define-table";
+export type { MutationContext, TableDefinition } from "./define-table";
+export { RetryableMutationError } from "./errors";
+export type { MutationStore, QueuedMutation, SyncStore } from "./store";
+export { SyncTable } from "./table";
+export { TableRegistry } from "./table-registry";

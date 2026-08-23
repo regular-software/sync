@@ -1,0 +1,23 @@
+{
+  "name": "@regular-sync/react-query",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@regular-sync/client": "workspace:*",
+    "@tanstack/react-query": "latest"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18"
+  }
+}

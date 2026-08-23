@@ -1,0 +1,1 @@
+export { IndexedDbSyncStore } from "./store";
