@@ -1,4 +1,4 @@
-import type { SyncTable } from "@regular-sync/shared";
+import type { SyncTable } from "@regular-software/sync-protocol";
 
 export function getRow<Row extends Record<string, unknown>>(
   transaction: IDBTransaction,

@@ -1,4 +1,4 @@
-import { SyncEngine } from "@regular-sync/server";
+import { SyncEngine } from "@regular-software/sync-server";
 import { db } from "./db.server";
 import { initializeSchema } from "./schema.server";
 

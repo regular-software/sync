@@ -1,4 +1,4 @@
-import type { SyncTable } from "@regular-sync/shared";
+import type { SyncTable } from "@regular-software/sync-protocol";
 import { MUTATION_STORE } from "./mutations";
 import { ensureMetadataStore } from "./metadata";
 

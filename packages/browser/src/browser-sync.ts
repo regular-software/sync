@@ -6,9 +6,9 @@ import {
   type SyncTable,
   type TableDefinition,
   type Pull,
-} from "@regular-sync/client";
+} from "@regular-software/sync";
 
-import { IndexedDbSyncStore } from "@regular-sync/indexeddb";
+import { IndexedDbSyncStore } from "@regular-software/sync-indexeddb";
 
 type BrowserSyncOptions = {
   database: string;

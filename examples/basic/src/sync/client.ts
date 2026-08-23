@@ -1,5 +1,5 @@
-import { createBrowserSync } from "@regular-sync/browser";
-import { defineTable } from "@regular-sync/client";
+import { createBrowserSync } from "@regular-software/sync-browser";
+import { defineTable } from "@regular-software/sync";
 
 import { mutateTodo } from "../server/todos.functions";
 import { pullSync } from "../server/sync.functions";

@@ -1,4 +1,4 @@
-import type { Change } from "@regular-sync/shared";
+import type { Change } from "@regular-software/sync-protocol";
 import type Database from "better-sqlite3";
 
 export function getChangesSince(

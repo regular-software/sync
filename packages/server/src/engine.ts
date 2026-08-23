@@ -7,7 +7,7 @@ import type {
   SyncedRow,
   SyncResult,
   SyncTable,
-} from "@regular-sync/shared";
+} from "@regular-software/sync-protocol";
 
 import type { Mutation } from "./types";
 

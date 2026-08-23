@@ -1,4 +1,4 @@
-import type { SyncTable as SyncTableDefinition } from "@regular-sync/shared";
+import type { SyncTable as SyncTableDefinition } from "@regular-software/sync-protocol";
 import { SyncClient } from "./client";
 import type { SyncClientOptions } from "./client";
 import { SyncTable } from "./table";

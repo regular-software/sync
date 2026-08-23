@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { SyncTable } from "@regular-sync/client";
+import type { SyncTable } from "@regular-software/sync";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 type RowOf<Table> = Table extends SyncTable<infer Row> ? Row : never;
@@ -31,7 +31,7 @@ export function createRegularSyncReact<Sync extends object>(
     string;
 
   type RowOfTable<Name extends TableName> =
-    Sync[Name] extends import("@regular-sync/client").SyncTable<
+    Sync[Name] extends import("@regular-software/sync").SyncTable<
       infer Row extends Record<string, unknown>
     >
       ? Row

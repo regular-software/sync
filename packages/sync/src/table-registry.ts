@@ -1,4 +1,4 @@
-import type { SyncTable } from "@regular-sync/shared";
+import type { SyncTable } from "@regular-software/sync-protocol";
 
 export class TableRegistry {
   private tables = new Map<string, SyncTable>();

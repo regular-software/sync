@@ -1,4 +1,4 @@
-import type { MutationStore, QueuedMutation } from "@regular-sync/client";
+import type { MutationStore, QueuedMutation } from "@regular-software/sync";
 
 import { waitForTransaction } from "./transactions";
 

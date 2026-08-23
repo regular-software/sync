@@ -1,4 +1,4 @@
-import { createRegularSyncReact } from "@regular-sync/react-query";
+import { createRegularSyncReact } from "@regular-software/sync-react-query";
 
 import { getSync } from "./client";
 

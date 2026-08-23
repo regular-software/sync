@@ -1,5 +1,5 @@
 {
-  "name": "@regular-sync/browser",
+  "name": "@regular-software/sync-browser",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     }
   },
   "dependencies": {
-    "@regular-sync/client": "workspace:*",
-    "@regular-sync/indexeddb": "workspace:*"
+    "@regular-software/sync": "workspace:*",
+    "@regular-software/sync-indexeddb": "workspace:*"
   }
 }

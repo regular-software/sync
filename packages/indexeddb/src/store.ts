@@ -1,6 +1,6 @@
-import type { MutationStore, SyncStore } from "@regular-sync/client";
-import { TableRegistry } from "@regular-sync/client";
-import type { SyncResult, SyncTable } from "@regular-sync/shared";
+import type { MutationStore, SyncStore } from "@regular-software/sync";
+import { TableRegistry } from "@regular-software/sync";
+import type { SyncResult, SyncTable } from "@regular-software/sync-protocol";
 import { openDatabase } from "./database";
 import { getVersion, META_STORE, setVersion } from "./metadata";
 import { createMutationStore } from "./mutations";

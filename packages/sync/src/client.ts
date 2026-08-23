@@ -1,4 +1,4 @@
-import type { SyncResult, SyncTable } from "@regular-sync/shared";
+import type { SyncResult, SyncTable } from "@regular-software/sync-protocol";
 import { RetryableMutationError } from "./errors";
 import type { SyncStore } from "./store";
 import type { MutationContext } from "./define-table";

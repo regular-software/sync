@@ -1,4 +1,4 @@
-import type { SyncResult, SyncTable } from "@regular-sync/shared";
+import type { SyncResult, SyncTable } from "@regular-software/sync-protocol";
 
 export type QueuedMutation<
   Row extends Record<string, unknown> = Record<string, unknown>,

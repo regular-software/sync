@@ -228,21 +228,21 @@ importers:
 
   examples/basic:
     dependencies:
-      '@regular-sync/browser':
+      '@regular-software/sync':
+        specifier: workspace:*
+        version: link:../../packages/sync
+      '@regular-software/sync-browser':
         specifier: workspace:*
         version: link:../../packages/browser
-      '@regular-sync/client':
+      '@regular-software/sync-protocol':
         specifier: workspace:*
-        version: link:../../packages/client
-      '@regular-sync/react-query':
+        version: link:../../packages/protocol
+      '@regular-software/sync-react-query':
         specifier: workspace:*
         version: link:../../packages/react-query
-      '@regular-sync/server':
+      '@regular-software/sync-server':
         specifier: workspace:*
         version: link:../../packages/server
-      '@regular-sync/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.3.3(vite@8.2.2(@types/node@22.20.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12))
@@ -298,33 +298,29 @@ importers:
 
   packages/browser:
     dependencies:
-      '@regular-sync/client':
+      '@regular-software/sync':
         specifier: workspace:*
-        version: link:../client
-      '@regular-sync/indexeddb':
+        version: link:../sync
+      '@regular-software/sync-indexeddb':
         specifier: workspace:*
         version: link:../indexeddb
 
-  packages/client:
-    dependencies:
-      '@regular-sync/shared':
-        specifier: workspace:*
-        version: link:../shared
-
   packages/indexeddb:
     dependencies:
-      '@regular-sync/client':
+      '@regular-software/sync':
         specifier: workspace:*
-        version: link:../client
-      '@regular-sync/shared':
+        version: link:../sync
+      '@regular-software/sync-protocol':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../protocol
+
+  packages/protocol: {}
 
   packages/react-query:
     dependencies:
-      '@regular-sync/client':
+      '@regular-software/sync':
         specifier: workspace:*
-        version: link:../client
+        version: link:../sync
       '@tanstack/react-query':
         specifier: latest
         version: 5.101.4(react@19.2.8)
@@ -338,9 +334,9 @@ importers:
 
   packages/server:
     dependencies:
-      '@regular-sync/shared':
+      '@regular-software/sync-protocol':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../protocol
       better-sqlite3:
         specifier: 'catalog:'
         version: 13.0.3
@@ -349,7 +345,11 @@ importers:
         specifier: 'catalog:'
         version: 9.6.0
 
-  packages/shared: {}
+  packages/sync:
+    dependencies:
+      '@regular-software/sync-protocol':
+        specifier: workspace:*
+        version: link:../protocol
 
 packages:
 

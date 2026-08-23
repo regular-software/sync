@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { SyncResult } from "@regular-sync/shared";
+import type { SyncResult } from "@regular-software/sync-protocol";
 
 import { sync } from "./sync.server";
 

@@ -1,4 +1,4 @@
-import type { SyncTable as SyncTableDefinition } from "@regular-sync/shared";
+import type { SyncTable as SyncTableDefinition } from "@regular-software/sync-protocol";
 import type { SyncStore } from "./store";
 
 export class SyncTable<Row extends Record<string, unknown>> {

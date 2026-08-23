@@ -12,11 +12,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@regular-sync/client": "workspace:*",
-    "@regular-sync/browser": "workspace:*",
-    "@regular-sync/server": "workspace:*",
-    "@regular-sync/shared": "workspace:*",
-    "@regular-sync/react-query": "workspace:*",
+    "@regular-software/sync": "workspace:*",
+    "@regular-software/sync-browser": "workspace:*",
+    "@regular-software/sync-server": "workspace:*",
+    "@regular-software/sync-protocol": "workspace:*",
+    "@regular-software/sync-react-query": "workspace:*",
     "better-sqlite3": "catalog:",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "latest",

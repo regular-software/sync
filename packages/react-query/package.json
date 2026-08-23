@@ -1,5 +1,5 @@
 {
-  "name": "@regular-sync/react-query",
+  "name": "@regular-software/sync-react-query",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     }
   },
   "dependencies": {
-    "@regular-sync/client": "workspace:*",
+    "@regular-software/sync": "workspace:*",
     "@tanstack/react-query": "latest"
   },
   "peerDependencies": {
