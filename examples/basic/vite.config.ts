@@ -1,16 +1,20 @@
 import { defineConfig } from "vite";
 import { searchForWorkspaceRoot } from "vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
 import viteReact from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 
 const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [tailwindcss(), tanstackStart(), viteReact()],
+  build: {
+    manifest: "asset-manifest.json",
+    outDir: "dist/client",
+  },
+  plugins: [viteReact()],
   server: {
     fs: {
       allow: [searchForWorkspaceRoot(process.cwd())],
+    },
+    proxy: {
+      "/api": "http://127.0.0.1:3001",
     },
   },
 });

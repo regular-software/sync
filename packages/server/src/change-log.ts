@@ -11,8 +11,7 @@ export function getChangesSince(
     SELECT
       version,
       table_name,
-      row_id,
-      operation
+      row_id
     FROM rs_changes
     WHERE version > ?
     ORDER BY version ASC
@@ -24,6 +23,5 @@ export function getChangesSince(
     version: row.version,
     tableName: row.table_name,
     rowId: row.row_id,
-    operation: row.operation,
   }));
 }

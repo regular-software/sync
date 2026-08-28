@@ -6,15 +6,28 @@ import type {
   JsonValue,
   SyncedRow,
   SyncResult,
+  SyncRequest,
+  SyncResetReason,
   SyncTable,
 } from "@regular-software/sync-protocol";
+import { createSyncSchemaFingerprint } from "@regular-software/sync-protocol";
 
 import type { Mutation } from "./types";
 
 export class SyncEngine {
   private tables = new Map<string, SyncTable>();
 
-  constructor(private db: Database.Database) {}
+  constructor(
+    private db: Database.Database,
+    private options: { schemaVersion: number },
+  ) {
+    if (
+      !Number.isSafeInteger(options.schemaVersion) ||
+      options.schemaVersion <= 0
+    ) {
+      throw new Error("schemaVersion must be a positive safe integer");
+    }
+  }
 
   private installChangeTriggers(table: SyncTable) {
     const tableName = table.name;
@@ -81,7 +94,21 @@ export class SyncEngine {
       id TEXT PRIMARY KEY,
       applied_at INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS rs_sync_state (
+      singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+      replica_id TEXT NOT NULL
+    );
   `);
+
+    this.db
+      .prepare(
+        `
+        INSERT OR IGNORE INTO rs_sync_state (singleton, replica_id)
+        VALUES (1, ?)
+        `,
+      )
+      .run(crypto.randomUUID());
   }
 
   registerTable(table: SyncTable) {
@@ -139,7 +166,98 @@ export class SyncEngine {
     return this.getVersion();
   }
 
-  syncSince(version: number): SyncResult {
+  syncSince(request: SyncRequest): SyncResult {
+    if (
+      !Number.isSafeInteger(request.version) ||
+      request.version < 0 ||
+      !Number.isSafeInteger(request.schemaVersion) ||
+      request.schemaVersion <= 0 ||
+      typeof request.schemaFingerprint !== "string" ||
+      (request.replicaId !== undefined && typeof request.replicaId !== "string")
+    ) {
+      throw new Error("Invalid synchronization request");
+    }
+
+    const read = this.db.transaction((syncRequest: SyncRequest) => {
+      const identity = this.getIdentity();
+
+      if (
+        syncRequest.schemaVersion !== identity.schemaVersion ||
+        syncRequest.schemaFingerprint !== identity.schemaFingerprint
+      ) {
+        throw new SyncSchemaMismatchError(identity);
+      }
+
+      const currentVersion = this.getVersion();
+
+      if (
+        syncRequest.replicaId !== undefined &&
+        syncRequest.replicaId !== identity.replicaId
+      ) {
+        return this.readSnapshot(identity, "replica-changed");
+      }
+
+      if (syncRequest.version > currentVersion) {
+        return this.readSnapshot(identity, "cursor-ahead");
+      }
+
+      if (syncRequest.version === 0) {
+        return this.readSnapshot(identity);
+      }
+
+      return this.readIncremental(syncRequest.version, identity);
+    });
+
+    return read(request);
+  }
+
+  private getIdentity() {
+    const row = this.db
+      .prepare("SELECT replica_id AS replicaId FROM rs_sync_state WHERE singleton = 1")
+      .get() as { replicaId: string };
+
+    return {
+      replicaId: row.replicaId,
+      schemaVersion: this.options.schemaVersion,
+      schemaFingerprint: createSyncSchemaFingerprint([...this.tables.values()]),
+    };
+  }
+
+  private readSnapshot(
+    identity: ReturnType<SyncEngine["getIdentity"]>,
+    resetReason?: SyncResetReason,
+  ): SyncResult {
+    const version = this.getVersion();
+    const rows: SyncedRow[] = [];
+
+    for (const table of this.tables.values()) {
+      const tableRows = this.db
+        .prepare(
+          `
+          SELECT *
+          FROM ${table.name}
+        `,
+        )
+        .all() as Record<string, JsonValue>[];
+
+      for (const row of tableRows) {
+        rows.push({ tableName: table.name, row });
+      }
+    }
+
+    return {
+      kind: "snapshot",
+      version,
+      ...identity,
+      ...(resetReason ? { resetReason } : {}),
+      rows,
+    };
+  }
+
+  private readIncremental(
+    version: number,
+    identity: ReturnType<SyncEngine["getIdentity"]>,
+  ): SyncResult {
     const changes = getChangesSince(this.db, version);
 
     const latestVersion = changes.at(-1)?.version ?? version;
@@ -181,9 +299,26 @@ export class SyncEngine {
     }
 
     return {
+      kind: "incremental",
       version: latestVersion,
+      ...identity,
       rows,
       deleted,
     };
+  }
+}
+
+export class SyncSchemaMismatchError extends Error {
+  readonly status = 409;
+
+  constructor(
+    readonly expected: {
+      replicaId: string;
+      schemaVersion: number;
+      schemaFingerprint: string;
+    },
+  ) {
+    super("Client and server synchronization schemas do not match");
+    this.name = "SyncSchemaMismatchError";
   }
 }

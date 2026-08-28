@@ -10,4 +10,8 @@ export class TableRegistry {
   find(name: string): SyncTable | undefined {
     return this.tables.get(name);
   }
+
+  values(): IterableIterator<SyncTable> {
+    return this.tables.values();
+  }
 }

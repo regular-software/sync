@@ -1,3 +1,5 @@
 import Database from "better-sqlite3";
 
-export const db = new Database("basic.db");
+export const sqlite = new Database("basic.db");
+
+sqlite.pragma("foreign_keys = ON");

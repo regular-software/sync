@@ -3,9 +3,14 @@ import {
   useContext,
   useEffect,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { SyncTable } from "@regular-software/sync";
+import type {
+  MutationFailure,
+  SyncStatus,
+  SyncTable,
+} from "@regular-software/sync";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 type RowOf<Table> = Table extends SyncTable<infer Row> ? Row : never;
@@ -22,6 +27,23 @@ type AnyTable = {
   start(): Promise<void>;
 };
 
+type StatusSync = {
+  getStatus(): SyncStatus;
+  subscribeStatus(listener: () => void): () => void;
+  start(): Promise<void>;
+  getMutationFailures(): Promise<MutationFailure[]>;
+  acknowledgeMutationFailure(id: string): Promise<void>;
+  subscribeMutationFailures(listener: () => void): () => void;
+};
+
+const loadingStatus: SyncStatus = {
+  lifecycle: "starting",
+  activity: "idle",
+  connectivity: "unknown",
+  pendingMutations: 0,
+  failedMutations: 0,
+};
+
 export function createRegularSyncReact<Sync extends object>(
   getSync: () => Promise<Sync>,
 ) {
@@ -30,12 +52,19 @@ export function createRegularSyncReact<Sync extends object>(
   }[keyof Sync] &
     string;
 
-  type RowOfTable<Name extends TableName> =
-    Sync[Name] extends import("@regular-software/sync").SyncTable<
-      infer Row extends Record<string, unknown>
-    >
-      ? Row
-      : never;
+  type MutationName = Sync extends {
+    mutations: infer Mutations;
+  }
+    ? keyof Mutations & string
+    : never;
+
+  type MutationInput<Name extends MutationName> = Sync extends {
+    mutations: infer Mutations;
+  }
+    ? Mutations[Name] extends (input: infer Input) => Promise<void>
+      ? Input
+      : never
+    : never;
 
   const Context = createContext(false);
 
@@ -70,10 +99,12 @@ export function createRegularSyncReact<Sync extends object>(
 
     const query = useQuery<Row[]>({
       queryKey,
-      enabled: !!table,
       networkMode: "always",
       queryFn: async () => {
-        return (await table!.getAll()) as Row[];
+        const sync = await getSync();
+        const queryTable = sync[tableName] as AnyTable;
+
+        return (await queryTable.getAll()) as Row[];
       },
     });
 
@@ -96,35 +127,103 @@ export function createRegularSyncReact<Sync extends object>(
     return query;
   }
 
-  function useSyncMutation<Name extends TableName>(tableName: Name) {
+  function useSyncMutation<Name extends MutationName>(mutationName: Name) {
     useRegularSyncContext();
 
-    const queryClient = useQueryClient();
-
     return useMutation({
-      mutationFn: async (row: RowOfTable<Name>) => {
+      mutationFn: async (input: MutationInput<Name>) => {
         const sync = await getSync();
+        const mutation = (sync as Sync & {
+          mutations: Record<
+            Name,
+            (input: MutationInput<Name>) => Promise<void>
+          >;
+        }).mutations[mutationName];
 
-        const table = sync[tableName] as {
-          mutate(row: RowOfTable<Name>): Promise<void>;
-        };
-
-        await table.mutate(row);
-      },
-
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: ["regular-sync", tableName],
-        });
+        await mutation(input);
       },
 
       networkMode: "always",
     });
   }
 
+  function useSyncStatus(): SyncStatus {
+    useRegularSyncContext();
+
+    const [sync, setSync] = useState<StatusSync>();
+
+    useEffect(() => {
+      let active = true;
+
+      void getSync().then((builtSync) => {
+        if (!active) {
+          return;
+        }
+
+        const statusSync = builtSync as Sync & StatusSync;
+        setSync(statusSync);
+        void statusSync.start().catch(() => {});
+      });
+
+      return () => {
+        active = false;
+      };
+    }, []);
+
+    return useSyncExternalStore(
+      sync
+        ? (listener) => sync.subscribeStatus(listener)
+        : () => () => {},
+      sync ? () => sync.getStatus() : () => loadingStatus,
+      () => loadingStatus,
+    );
+  }
+
+  function useSyncMutationFailures() {
+    useRegularSyncContext();
+    const queryClient = useQueryClient();
+    const queryKey = ["regular-sync-mutation-failures"] as const;
+    const query = useQuery<MutationFailure[]>({
+      queryKey,
+      networkMode: "always",
+      queryFn: async () => {
+        const sync = (await getSync()) as Sync & StatusSync;
+        return sync.getMutationFailures();
+      },
+    });
+
+    useEffect(() => {
+      let unsubscribe = () => {};
+      let active = true;
+
+      void getSync().then((builtSync) => {
+        if (!active) return;
+        const sync = builtSync as Sync & StatusSync;
+        unsubscribe = sync.subscribeMutationFailures(() => {
+          void queryClient.invalidateQueries({ queryKey });
+        });
+      });
+
+      return () => {
+        active = false;
+        unsubscribe();
+      };
+    }, [queryClient]);
+
+    return {
+      ...query,
+      acknowledge: async (id: string) => {
+        const sync = (await getSync()) as Sync & StatusSync;
+        await sync.acknowledgeMutationFailure(id);
+      },
+    };
+  }
+
   return {
     RegularSyncProvider,
     useSyncQuery,
     useSyncMutation,
+    useSyncStatus,
+    useSyncMutationFailures,
   };
 }

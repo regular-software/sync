@@ -1,1 +1,1 @@
-export { SyncEngine } from "./engine";
+export { SyncEngine, SyncSchemaMismatchError } from "./engine";

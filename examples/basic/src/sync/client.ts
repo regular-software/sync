@@ -1,38 +1,39 @@
-import { createBrowserSync } from "@regular-software/sync-browser";
+import {
+  createBrowserSync,
+  createHttpMutation,
+  createHttpPull,
+} from "@regular-software/sync-browser";
 import { defineTable } from "@regular-software/sync";
 
-import { mutateTodo } from "../server/todos.functions";
-import { pullSync } from "../server/sync.functions";
+import type {
+  CreateInvoiceInput,
+  Invoice,
+  InvoiceLine,
+} from "../invoices";
+import { syncTables } from "../sync-tables";
 
-type Todo = {
-  id: string;
-  title: string;
-  completed: number;
-};
+const invoices = defineTable<Invoice>(syncTables.invoices);
 
-const todos = defineTable<Todo>({
-  primaryKey: "id",
-
-  mutations: {
-    mutate: async (todo, { mutationId }) => {
-      await mutateTodo({
-        data: {
-          mutationId,
-          todo,
-        },
-      });
-    },
-  },
-});
+const invoiceLines = defineTable<InvoiceLine>(syncTables.invoiceLines);
 
 export const getSync = createBrowserSync({
-  database: "regular-sync-basic",
-
-  pull: async (version) => {
-    return pullSync({
-      data: version,
-    });
-  },
+  database: "regular-sync-invoices",
+  schemaVersion: 1,
+  pull: createHttpPull(),
 })
-  .register("todos", todos)
+  .register(syncTables.invoices.name, invoices)
+  .register(syncTables.invoiceLines.name, invoiceLines)
+  .mutation("createInvoice", {
+    optimistic: (input: CreateInvoiceInput, transaction) => {
+      transaction.put(syncTables.invoices.name, input.invoice);
+
+      for (const line of input.lines) {
+        transaction.put(syncTables.invoiceLines.name, line);
+      }
+    },
+
+    execute: createHttpMutation<CreateInvoiceInput>({
+      url: "/api/mutations/create-invoice",
+    }),
+  })
   .build();

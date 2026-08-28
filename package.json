@@ -2,6 +2,10 @@
   "name": "regular-sync",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "tsx --test packages/**/*.test.ts",
+    "test:types": "tsc -p packages/sync/test/tsconfig.json"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
@@ -11,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "fake-indexeddb": "^6.2.5",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   }

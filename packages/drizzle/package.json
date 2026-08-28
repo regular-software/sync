@@ -1,0 +1,22 @@
+{
+  "name": "@regular-software/sync-drizzle",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@regular-software/sync-protocol": "workspace:*",
+    "@regular-software/sync-server": "workspace:*",
+    "better-sqlite3": "catalog:",
+    "drizzle-orm": "latest"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "catalog:"
+  }
+}
