@@ -43,6 +43,7 @@ export type MutationDefinition<Tables, Input> = {
   optimistic?: (
     input: Input,
     transaction: OptimisticTransaction<Tables>,
+    context: MutationContext,
   ) => void;
 
   execute(input: Input, context: MutationContext): Promise<MutationAck>;
@@ -51,6 +52,7 @@ export type MutationDefinition<Tables, Input> = {
 export function collectOptimisticEffects<Tables, Input>(
   definition: MutationDefinition<Tables, Input>,
   input: Input,
+  context: MutationContext,
 ): OptimisticEffect[] {
   const effects: OptimisticEffect[] = [];
 
@@ -58,14 +60,18 @@ export function collectOptimisticEffects<Tables, Input>(
     return effects;
   }
 
-  const result: unknown = definition.optimistic(input, {
-    put(tableName, row) {
-      effects.push({ operation: "put", tableName, row });
+  const result: unknown = definition.optimistic(
+    input,
+    {
+      put(tableName, row) {
+        effects.push({ operation: "put", tableName, row });
+      },
+      delete(tableName, rowId) {
+        effects.push({ operation: "delete", tableName, rowId });
+      },
     },
-    delete(tableName, rowId) {
-      effects.push({ operation: "delete", tableName, rowId });
-    },
-  });
+    context,
+  );
 
   if (
     typeof result === "object" &&

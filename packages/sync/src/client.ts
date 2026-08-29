@@ -327,13 +327,14 @@ export class SyncClient {
     name: string,
     input: Input,
     effects: OptimisticEffect[],
+    context: MutationContext = { mutationId: crypto.randomUUID() },
   ): Promise<void> {
     if (!this.mutationHandlers.has(name)) {
       throw new Error(`No mutation configured with name "${name}"`);
     }
 
     await this.options.store.mutations.add({
-      id: crypto.randomUUID(),
+      id: context.mutationId,
       name,
       input,
       effects,

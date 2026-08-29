@@ -108,9 +108,10 @@ export class SyncClientBuilder<
       client.registerMutationHandler(name, definition.execute);
 
       mutations[name] = (input) => {
-        const effects = collectOptimisticEffects(definition, input);
+        const context = { mutationId: crypto.randomUUID() };
+        const effects = collectOptimisticEffects(definition, input, context);
 
-        return client.mutate(name, input, effects);
+        return client.mutate(name, input, effects, context);
       };
     }
 

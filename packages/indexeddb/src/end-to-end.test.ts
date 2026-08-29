@@ -43,6 +43,7 @@ test("lost mutation response retries once and confirms through Hono pull", async
       `regular-sync-e2e-${crypto.randomUUID()}`,
     );
     let attempts = 0;
+    let optimisticMutationId: string | undefined;
     const client = await createSyncClient({
       store,
       schemaVersion: 1,
@@ -54,10 +55,12 @@ test("lost mutation response retries once and confirms through Hono pull", async
         defineTable<DocumentRow>({ primaryKey: "id" }),
       )
       .mutation("createDocument", {
-        optimistic: (document: DocumentRow, transaction) => {
+        optimistic: (document: DocumentRow, transaction, { mutationId }) => {
+          optimisticMutationId = mutationId;
           transaction.put("documents", document);
         },
         execute: async (document, { mutationId }) => {
+          assert.equal(mutationId, optimisticMutationId);
           attempts += 1;
           const version = engine.mutate({
             id: mutationId,
@@ -78,6 +81,7 @@ test("lost mutation response retries once and confirms through Hono pull", async
       .build();
 
     await client.mutations.createDocument({ id: "document-1", title: "Local" });
+    assert.match(optimisticMutationId ?? "", /^[0-9a-f-]{36}$/);
     assert.deepEqual(await client.documents.getAll(), [
       { id: "document-1", title: "Local" },
     ]);

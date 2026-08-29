@@ -12,6 +12,7 @@ import type {
   SyncTable,
 } from "@regular-software/sync";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { createQueryRefresh } from "./query-refresh";
 
 type RowOf<Table> = Table extends SyncTable<infer Row> ? Row : never;
 
@@ -113,15 +114,18 @@ export function createRegularSyncReact<Sync extends object>(
         return;
       }
 
+      const queryRefresh = createQueryRefresh(queryClient, queryKey);
+
       const unsubscribe = table.subscribe(() => {
-        void queryClient.invalidateQueries({
-          queryKey,
-        });
+        queryRefresh.refresh();
       });
 
       void table.start();
 
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+        queryRefresh.dispose();
+      };
     }, [queryClient, table, tableName]);
 
     return query;

@@ -17,7 +17,8 @@ const clientPromise = builder
   .register("todos", defineTable<Todo>({ primaryKey: "id" }))
   .register("projects", defineTable<Project>({ primaryKey: "id" }))
   .mutation("createTodo", {
-    optimistic: (todo: Todo, transaction) => {
+    optimistic: (todo: Todo, transaction, { mutationId }) => {
+      mutationId satisfies string;
       transaction.put("todos", todo);
 
       // @ts-expect-error Projects require a Project row.
