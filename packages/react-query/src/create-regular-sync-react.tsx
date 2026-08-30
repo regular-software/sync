@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   useSyncExternalStore,
   type ReactNode,
@@ -12,6 +13,7 @@ import type {
   SyncTable,
 } from "@regular-software/sync";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import type { QueryKey } from "@tanstack/react-query";
 import { createQueryRefresh } from "./query-refresh";
 
 type RowOf<Table> = Table extends SyncTable<infer Row> ? Row : never;
@@ -26,6 +28,12 @@ type AnyTable = {
   subscribe(listener: () => void): () => void;
 
   start(): Promise<void>;
+};
+
+export type SyncQueryOptions<Row, Selected = Row[]> = {
+  queryKey?: QueryKey;
+  filter?: (row: Row) => boolean;
+  select?: (rows: Row[]) => Selected;
 };
 
 type StatusSync = {
@@ -81,7 +89,10 @@ export function createRegularSyncReact<Sync extends object>(
     }
   }
 
-  function useSyncQuery<Name extends TableName>(tableName: Name) {
+  function useSyncQuery<Name extends TableName, Selected = RowOf<Sync[Name]>[]>(
+    tableName: Name,
+    options: SyncQueryOptions<RowOf<Sync[Name]>, Selected> = {},
+  ) {
     type Row = RowOf<Sync[Name]>;
 
     useRegularSyncContext();
@@ -90,7 +101,11 @@ export function createRegularSyncReact<Sync extends object>(
 
     const queryClient = useQueryClient();
 
-    const queryKey = ["regular-sync", tableName] as const;
+    const extraQueryKey = options.queryKey ?? [];
+    const queryKey = useMemo(
+      () => ["regular-sync", tableName, ...extraQueryKey] as const,
+      [tableName, JSON.stringify(extraQueryKey)],
+    );
 
     useEffect(() => {
       void getSync().then((sync) => {
@@ -98,15 +113,17 @@ export function createRegularSyncReact<Sync extends object>(
       });
     }, [tableName]);
 
-    const query = useQuery<Row[]>({
+    const query = useQuery<Row[], Error, Selected>({
       queryKey,
       networkMode: "always",
       queryFn: async () => {
         const sync = await getSync();
         const queryTable = sync[tableName] as AnyTable;
 
-        return (await queryTable.getAll()) as Row[];
+        const rows = (await queryTable.getAll()) as Row[];
+        return options.filter ? rows.filter(options.filter) : rows;
       },
+      select: options.select,
     });
 
     useEffect(() => {
@@ -126,7 +143,7 @@ export function createRegularSyncReact<Sync extends object>(
         unsubscribe();
         queryRefresh.dispose();
       };
-    }, [queryClient, table, tableName]);
+    }, [queryClient, table, tableName, queryKey]);
 
     return query;
   }
