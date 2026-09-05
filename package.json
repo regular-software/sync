@@ -9,13 +9,7 @@
     "release:check": "node scripts/release-check.mjs",
     "package:smoke": "node scripts/package-smoke-test.mjs"
   },
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.5.2",
-      "onFail": "download"
-    }
-  },
+  "packageManager": "pnpm@11.22.0",
   "devDependencies": {
     "@types/node": "^26.2.0",
     "fake-indexeddb": "^6.2.5",
