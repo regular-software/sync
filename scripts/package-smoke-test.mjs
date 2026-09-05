@@ -13,8 +13,9 @@ try {
   execFileSync("npm", ["install", "--no-save", "--no-package-lock", "react@19.2.8"], { cwd: temp, stdio: "inherit", env: npmEnv });
   const tarballs = [];
   for (const name of packages) {
-    const packed = JSON.parse(execFileSync("npm", ["pack", "--json", "--pack-destination", temp], { cwd: join(root, "packages", name), encoding: "utf8", env: npmEnv }))[0];
-    tarballs.push(join(temp, packed.filename));
+    const packedResult = JSON.parse(execFileSync("pnpm", ["pack", "--json", "--pack-destination", temp], { cwd: join(root, "packages", name), encoding: "utf8", env: npmEnv }));
+    const packed = Array.isArray(packedResult) ? packedResult[0] : packedResult;
+    tarballs.push(packed.filename.startsWith("/") ? packed.filename : join(temp, packed.filename));
   }
   execFileSync("npm", ["install", "--no-save", "--no-package-lock", ...tarballs], { cwd: temp, stdio: "inherit", env: npmEnv });
   for (const name of packages) {

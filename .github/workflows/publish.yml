@@ -38,6 +38,11 @@ jobs:
           NPM_CONFIG_PROVENANCE: true
         run: |
           set -euo pipefail
+          pack_dir="$(mktemp -d)"
+          trap 'rm -rf "$pack_dir"' EXIT
           for package in protocol sync indexeddb browser server hono drizzle react-query; do
-            npm publish "./packages/$package" --access public
+            (cd "packages/$package" && pnpm pack --pack-destination "$pack_dir")
+          done
+          for package in regular-software-sync-protocol regular-software-sync regular-software-sync-indexeddb regular-software-sync-browser regular-software-sync-server regular-software-sync-hono regular-software-sync-drizzle regular-software-sync-react-query; do
+            npm publish "$pack_dir/$package-$(node -p "require('./package.json').version").tgz" --access public
           done

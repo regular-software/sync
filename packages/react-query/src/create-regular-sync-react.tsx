@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -78,7 +78,7 @@ export function createRegularSyncReact<Sync extends object>(
   const Context = createContext(false);
 
   function RegularSyncProvider({ children }: { children: ReactNode }) {
-    return <Context.Provider value={true}>{children}</Context.Provider>;
+    return React.createElement(Context.Provider, { value: true }, children);
   }
 
   function useRegularSyncContext() {

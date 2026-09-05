@@ -1,6 +1,6 @@
 {
   "name": "@regular-software/sync-hono",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "Hono adapter for regular software sync servers.",
   "license": "MIT",
@@ -14,14 +14,27 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
-  "repository": {"type": "git", "url": "https://github.com/regular-software/sync.git", "directory": "packages/hono"},
-  "bugs": {"url": "https://github.com/regular-software/sync/issues"},
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/regular-software/sync.git",
+    "directory": "packages/hono"
+  },
+  "bugs": {
+    "url": "https://github.com/regular-software/sync/issues"
+  },
   "homepage": "https://github.com/regular-software/sync#readme",
-  "engines": {"node": ">=20"},
-  "publishConfig": {"access": "public"},
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-    "@regular-software/sync-protocol": "0.3.0",
+    "@regular-software/sync-protocol": "workspace:*",
     "hono": "^4.13.5"
   }
 }

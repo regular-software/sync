@@ -1,6 +1,6 @@
 {
   "name": "@regular-software/sync-react-query",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "React Query integration for regular software sync clients.",
   "license": "MIT",
@@ -14,14 +14,27 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
-  "repository": {"type": "git", "url": "https://github.com/regular-software/sync.git", "directory": "packages/react-query"},
-  "bugs": {"url": "https://github.com/regular-software/sync/issues"},
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/regular-software/sync.git",
+    "directory": "packages/react-query"
+  },
+  "bugs": {
+    "url": "https://github.com/regular-software/sync/issues"
+  },
   "homepage": "https://github.com/regular-software/sync#readme",
-  "engines": {"node": ">=20"},
-  "publishConfig": {"access": "public"},
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-    "@regular-software/sync": "0.3.0",
+    "@regular-software/sync": "workspace:*",
     "@tanstack/react-query": "^5.102.6"
   },
   "peerDependencies": {
