@@ -1,0 +1,16 @@
+{
+  "include": ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx", "packages/sync/test/types.ts"],
+  "exclude": ["**/*.test.ts"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "jsx": "react-jsx"
+  }
+}

@@ -1,4 +1,5 @@
 export { SyncClientBuilder } from "./builder";
+export type { BuiltSyncClient } from "./builder";
 export { SyncClient } from "./client";
 export type {
   Connectivity,

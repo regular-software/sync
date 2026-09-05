@@ -5,6 +5,7 @@ import {
   RetryableSyncError,
   type MutationContext,
   type MutationDefinition,
+  type BuiltSyncClient,
   type SyncClientBuilder,
   type SyncTable,
   type TableDefinition,
@@ -78,7 +79,7 @@ export class BrowserSyncBuilder<
     >;
   }
 
-  build() {
+  build(): () => Promise<BuiltSyncClient<Tables, Mutations>> {
     let syncPromise:
       | ReturnType<SyncClientBuilder<Tables, Mutations>["build"]>
       | undefined;

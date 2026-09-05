@@ -228,6 +228,9 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
 
   examples/basic:
     dependencies:
@@ -314,35 +317,35 @@ importers:
   packages/browser:
     dependencies:
       '@regular-software/sync':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../sync
       '@regular-software/sync-indexeddb':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../indexeddb
 
   packages/drizzle:
     dependencies:
       '@regular-software/sync-protocol':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../protocol
       '@regular-software/sync-server':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../server
       better-sqlite3:
-        specifier: 'catalog:'
+        specifier: ^13.0.3
         version: 13.0.3
       drizzle-orm:
-        specifier: latest
+        specifier: ^0.45.2
         version: 0.45.2(@types/better-sqlite3@9.6.0)(better-sqlite3@13.0.3)
     devDependencies:
       '@types/better-sqlite3':
-        specifier: 'catalog:'
+        specifier: ^9.6.0
         version: 9.6.0
 
   packages/hono:
     dependencies:
       '@regular-software/sync-protocol':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../protocol
       hono:
         specifier: ^4.13.5
@@ -351,10 +354,10 @@ importers:
   packages/indexeddb:
     dependencies:
       '@regular-software/sync':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../sync
       '@regular-software/sync-protocol':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../protocol
 
   packages/protocol: {}
@@ -362,10 +365,10 @@ importers:
   packages/react-query:
     dependencies:
       '@regular-software/sync':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../sync
       '@tanstack/react-query':
-        specifier: latest
+        specifier: ^5.102.6
         version: 5.102.6(react@19.2.8)
       react:
         specifier: ^19.0.0
@@ -378,20 +381,20 @@ importers:
   packages/server:
     dependencies:
       '@regular-software/sync-protocol':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../protocol
       better-sqlite3:
-        specifier: 'catalog:'
+        specifier: ^13.0.3
         version: 13.0.3
     devDependencies:
       '@types/better-sqlite3':
-        specifier: 'catalog:'
+        specifier: ^9.6.0
         version: 9.6.0
 
   packages/sync:
     dependencies:
       '@regular-software/sync-protocol':
-        specifier: workspace:*
+        specifier: 0.3.0
         version: link:../protocol
 
 packages:

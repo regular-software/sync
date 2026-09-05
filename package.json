@@ -3,8 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "tsx --test packages/**/*.test.ts",
-    "test:types": "tsc -p packages/sync/test/tsconfig.json"
+    "build": "node scripts/build.mjs",
+    "test": "tsx --test 'packages/**/*.test.ts'",
+    "typecheck": "tsc -p tsconfig.typecheck.json",
+    "release:check": "node scripts/release-check.mjs",
+    "package:smoke": "node scripts/package-smoke-test.mjs"
   },
   "devEngines": {
     "packageManager": {
@@ -17,6 +20,7 @@
     "@types/node": "^26.2.0",
     "fake-indexeddb": "^6.2.5",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "esbuild": "^0.28.2"
   }
 }
