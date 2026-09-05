@@ -39,5 +39,5 @@ jobs:
         run: |
           set -euo pipefail
           for package in protocol sync indexeddb browser server hono drizzle react-query; do
-            npm publish "packages/$package" --access public
+            npm publish "./packages/$package" --access public
           done
