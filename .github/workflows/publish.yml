@@ -43,6 +43,8 @@ jobs:
           for package in protocol sync indexeddb browser server hono drizzle react-query; do
             (cd "packages/$package" && pnpm pack --pack-destination "$pack_dir")
           done
-          for package in regular-software-sync-protocol regular-software-sync regular-software-sync-indexeddb regular-software-sync-browser regular-software-sync-server regular-software-sync-hono regular-software-sync-drizzle regular-software-sync-react-query; do
-            npm publish "$pack_dir/$package-$(node -p "require('./package.json').version").tgz" --access public
+          for package in protocol sync indexeddb browser server hono drizzle react-query; do
+            tarball="$(find "$pack_dir" -maxdepth 1 -type f -name "regular-software-$package-*.tgz" -print -quit)"
+            test -n "$tarball"
+            npm publish "$tarball" --access public
           done
