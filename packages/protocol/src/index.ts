@@ -1,13 +1,25 @@
 export type Change = {
+  sequence: number;
   version: number;
   tableName: string;
   rowId: string;
+  operation: "insert" | "update" | "delete";
+  previousRow?: Record<string, JsonValue>;
 };
 
 export type SyncTable = {
   name: string;
   primaryKey: string;
+  columns?: string[];
 };
+
+export type SyncFilterClause = {
+  column: string;
+  operator: "=" | "!=" | "<" | "<=" | ">" | ">=" | "in" | "isNull";
+  value?: JsonValue | JsonValue[];
+};
+
+export type SyncFilterSet = Record<string, SyncFilterClause[]>;
 
 export type SyncRequest = {
   version: number;
@@ -22,16 +34,22 @@ export type SyncIdentity = {
   schemaFingerprint: string;
 };
 
-export type SyncResetReason = "replica-changed" | "cursor-ahead";
+export type SyncResetReason =
+  | "replica-changed"
+  | "cursor-ahead"
+  | "cursor-expired";
 
 export type SyncedRow = {
   tableName: string;
   row: Record<string, JsonValue>;
 };
 
-export type DeletedRow = {
+export type SyncPacket = {
+  version: number;
   tableName: string;
   rowId: string;
+  operation: "insert" | "update" | "delete";
+  row?: Record<string, JsonValue>;
 };
 
 export type SyncResult =
@@ -50,8 +68,7 @@ export type SyncResult =
       replicaId: string;
       schemaVersion: number;
       schemaFingerprint: string;
-      rows: SyncedRow[];
-      deleted: DeletedRow[];
+      packets: SyncPacket[];
     };
 
 export function createSyncSchemaFingerprint(tables: SyncTable[]): string {

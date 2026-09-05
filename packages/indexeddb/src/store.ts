@@ -151,13 +151,15 @@ export class IndexedDbSyncStore implements SyncStore {
         : [],
     );
 
-    for (const row of result.rows) {
-      if (this.tables.find(row.tableName)) tableNames.add(row.tableName);
+    if (result.kind === "snapshot") {
+      for (const row of result.rows) {
+        if (this.tables.find(row.tableName)) tableNames.add(row.tableName);
+      }
     }
 
     if (result.kind === "incremental") {
-      for (const row of result.deleted) {
-        if (this.tables.find(row.tableName)) tableNames.add(row.tableName);
+      for (const packet of result.packets) {
+        if (this.tables.find(packet.tableName)) tableNames.add(packet.tableName);
       }
     }
 
@@ -203,15 +205,17 @@ export class IndexedDbSyncStore implements SyncStore {
         }
       }
 
-      for (const syncedRow of result.rows) {
-        const table = this.tables.find(syncedRow.tableName);
-        if (table) putRow(transaction, table, syncedRow.row);
-      }
-
-      if (result.kind === "incremental") {
-        for (const deletedRow of result.deleted) {
-          const table = this.tables.find(deletedRow.tableName);
-          if (table) deleteRow(transaction, table, deletedRow.rowId);
+      if (result.kind === "snapshot") {
+        for (const syncedRow of result.rows) {
+          const table = this.tables.find(syncedRow.tableName);
+          if (table) putRow(transaction, table, syncedRow.row);
+        }
+      } else {
+        for (const packet of result.packets) {
+          const table = this.tables.find(packet.tableName);
+          if (!table) continue;
+          if (packet.operation === "delete") deleteRow(transaction, table, packet.rowId);
+          else if (packet.row) putRow(transaction, table, packet.row);
         }
       }
 
@@ -250,8 +254,7 @@ export class IndexedDbSyncStore implements SyncStore {
         (!stale &&
           (result.kind === "snapshot" ||
             result.version !== current.version ||
-            result.rows.length > 0 ||
-            result.deleted.length > 0)),
+            result.packets.length > 0)),
       confirmedMutationIds: confirmedMutations.map((mutation) => mutation.id),
       reset,
     };

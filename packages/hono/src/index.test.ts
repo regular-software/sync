@@ -11,8 +11,7 @@ test("serves sync pulls and validates the cursor", async () => {
         replicaId: "replica-1",
         schemaVersion: request.schemaVersion,
         schemaFingerprint: request.schemaFingerprint,
-        rows: [],
-        deleted: [],
+        packets: [],
       }),
     },
     pollIntervalMs: 0,
@@ -28,8 +27,7 @@ test("serves sync pulls and validates the cursor", async () => {
     replicaId: "replica-1",
     schemaVersion: 1,
     schemaFingerprint: "[]",
-    rows: [],
-    deleted: [],
+    packets: [],
   });
 
   const invalid = await transport.app.request(
@@ -52,8 +50,7 @@ test("resolves trusted context and awaits async sync results", async () => {
           replicaId: "replica-1",
           schemaVersion: request.schemaVersion,
           schemaFingerprint: request.schemaFingerprint,
-          rows: [],
-          deleted: [],
+          packets: [],
         };
       },
     },

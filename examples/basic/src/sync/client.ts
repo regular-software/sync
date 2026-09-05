@@ -1,6 +1,7 @@
 import {
   createBrowserSync,
   createHttpMutation,
+  createHttpMutationBatch,
   createHttpPull,
 } from "@regular-software/sync-browser";
 import { defineTable } from "@regular-software/sync";
@@ -20,6 +21,7 @@ export const getSync = createBrowserSync({
   database: "regular-sync-invoices",
   schemaVersion: 1,
   pull: createHttpPull(),
+  push: createHttpMutationBatch({ url: "/api/mutations/batch" }),
 })
   .register(syncTables.invoices.name, invoices)
   .register(syncTables.invoiceLines.name, invoiceLines)

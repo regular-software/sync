@@ -120,13 +120,15 @@ test("acknowledged effects remain until the pulled version confirms them", async
             kind: "incremental",
             version: serverVersion,
             ...identity(request),
-            rows: [
+            packets: [
               {
+                version: serverVersion,
                 tableName: "invoices",
+                operation: "update",
+                rowId: "invoice-1",
                 row: { id: "invoice-1", status: "confirmed" },
               },
             ],
-            deleted: [],
           },
   })
     .register("invoices", invoicesDefinition)

@@ -21,6 +21,7 @@ import {
 } from "./status";
 
 export type Pull = (request: SyncRequest) => Promise<SyncResult>;
+export type MutationPush = (mutations: Array<Pick<QueuedMutation, "id" | "name" | "input">>) => Promise<Array<{ id: string; version: number }>>;
 export type Subscribe = (onChange: () => void) => () => void;
 
 export type Connectivity = {
@@ -38,6 +39,7 @@ export type RetryOptions = {
 
 export type SyncClientOptions = {
   pull: Pull;
+  push?: MutationPush;
   store: SyncStore;
   schemaVersion: number;
   subscribe?: Subscribe;
@@ -374,6 +376,18 @@ export class SyncClient {
   private async flushQueuedMutations(
     queued: QueuedMutation[],
   ): Promise<unknown> {
+    if (this.options.push) {
+      const pending = queued.filter((mutation) => mutation.acknowledgedVersion === undefined);
+      if (pending.length === 0) return;
+      const acknowledgements = await this.options.push(pending.map(({ id, name, input }) => ({ id, name, input })));
+      for (const acknowledgement of acknowledgements) {
+        if (!Number.isSafeInteger(acknowledgement.version) || acknowledgement.version < 0) throw new Error("Mutation batch returned an invalid synchronization version");
+        const mutation = pending.find((candidate) => candidate.id === acknowledgement.id);
+        if (!mutation) throw new Error("Mutation batch acknowledged an unknown mutation");
+        await this.options.store.mutations.acknowledge(mutation.id, acknowledgement.version);
+      }
+      return;
+    }
     for (const mutation of queued) {
       if (mutation.acknowledgedVersion !== undefined) continue;
 

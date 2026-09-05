@@ -3,6 +3,7 @@ export type { BuiltSyncClient } from "./builder";
 export { SyncClient } from "./client";
 export type {
   Connectivity,
+  MutationPush,
   Pull,
   RetryOptions,
   Subscribe,

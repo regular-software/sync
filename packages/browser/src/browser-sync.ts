@@ -4,6 +4,7 @@ import {
   RetryableMutationError,
   RetryableSyncError,
   type MutationContext,
+  type MutationPush,
   type MutationDefinition,
   type BuiltSyncClient,
   type SyncClientBuilder,
@@ -19,6 +20,7 @@ import { IndexedDbSyncStore } from "@regular-software/sync-indexeddb";
 export type BrowserSyncOptions = {
   database: string;
   pull: Pull;
+  push?: MutationPush;
   events?: string;
   eventsWithCredentials?: boolean;
   subscribe?: Subscribe;
@@ -99,6 +101,7 @@ export class BrowserSyncBuilder<
     let builder: SyncClientBuilder<any, any> = createSyncClient({
       store,
       pull: this.options.pull,
+      push: this.options.push,
       schemaVersion: this.options.schemaVersion,
       retry: this.options.retry,
 
@@ -304,6 +307,38 @@ export function createHttpMutation<Input>(options: {
   };
 }
 
+export function createHttpMutationBatch(options: {
+  url: string;
+  fetch?: typeof globalThis.fetch;
+  credentials?: RequestCredentials;
+  headers?: HeadersInit;
+}): MutationPush {
+  const fetchImplementation = options.fetch ?? globalThis.fetch;
+  return async (mutations) => {
+    let response: Response;
+    try {
+      response = await fetchImplementation(options.url, {
+        method: "POST",
+        credentials: options.credentials,
+        headers: mergeHeaders({ "Content-Type": "application/json" }, options.headers),
+        body: JSON.stringify({ mutations }),
+      });
+    } catch (error) {
+      throw new RetryableMutationError("Mutation batch request could not reach the server", { cause: error });
+    }
+    if (!response.ok) {
+      const error = createHttpError(response, "Mutation batch request failed");
+      if (isRetryableStatus(response.status)) throw new RetryableMutationError(error.message, { cause: error });
+      throw error;
+    }
+    const value = await response.json() as unknown;
+    if (!isRecord(value) || !Array.isArray(value.mutations) || !value.mutations.every((item: unknown) => isRecord(item) && typeof item.id === "string" && Number.isSafeInteger(item.version) && item.version >= 0)) {
+      throw new RetryableMutationError("Mutation batch response is malformed");
+    }
+    return value.mutations as Array<{ id: string; version: number }>;
+  };
+}
+
 function mergeHeaders(defaults: HeadersInit, configured?: HeadersInit) {
   const headers = new Headers(defaults);
 
@@ -349,37 +384,34 @@ function isSyncResult(value: unknown): value is Awaited<ReturnType<Pull>> {
     !Number.isSafeInteger(value.schemaVersion) ||
     value.schemaVersion <= 0 ||
     typeof value.schemaFingerprint !== "string" ||
-    !Array.isArray(value.rows)
-  ) {
-    return false;
-  }
-
-  if (
-    !value.rows.every(
-      (entry: unknown) =>
-        isRecord(entry) &&
-        typeof entry.tableName === "string" &&
-        isRecord(entry.row),
-    )
+    (value.kind === "snapshot" ? !Array.isArray(value.rows) : !Array.isArray(value.packets))
   ) {
     return false;
   }
 
   if (value.kind === "snapshot") {
-    return (
-      value.resetReason === undefined ||
-      value.resetReason === "replica-changed" ||
-      value.resetReason === "cursor-ahead"
-    );
-  }
-
-  return (
-    Array.isArray(value.deleted) &&
-    value.deleted.every(
+    if (!value.rows.every(
       (entry: unknown) =>
         isRecord(entry) &&
         typeof entry.tableName === "string" &&
-        typeof entry.rowId === "string",
-    )
+        isRecord(entry.row),
+    )) return false;
+    return (
+      value.resetReason === undefined ||
+      value.resetReason === "replica-changed" ||
+      value.resetReason === "cursor-ahead" ||
+      value.resetReason === "cursor-expired"
+    );
+  }
+
+  return value.packets.every(
+    (entry: unknown) =>
+      isRecord(entry) &&
+      Number.isSafeInteger(entry.version) &&
+      typeof entry.tableName === "string" &&
+      typeof entry.rowId === "string" &&
+      (entry.operation === "delete" ||
+        ((entry.operation === "insert" || entry.operation === "update") &&
+          isRecord(entry.row))),
   );
 }

@@ -9,19 +9,25 @@ export function getChangesSince(
     .prepare(
       `
     SELECT
+      sequence,
       version,
       table_name,
-      row_id
+      row_id,
+      operation,
+      previous_row
     FROM rs_changes
     WHERE version > ?
-    ORDER BY version ASC
+    ORDER BY version ASC, sequence ASC
   `,
     )
     .all(version);
 
   return rows.map((row: any) => ({
+    sequence: row.sequence,
     version: row.version,
     tableName: row.table_name,
     rowId: row.row_id,
+    operation: row.operation,
+    ...(row.previous_row ? { previousRow: JSON.parse(row.previous_row) } : {}),
   }));
 }

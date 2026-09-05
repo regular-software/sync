@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import { createSyncHono } from "@regular-software/sync-hono";
 
 import type { CreateInvoiceInput } from "../invoices";
-import { createInvoiceOnServer } from "./invoices.server";
+import { createInvoiceBatchOnServer, createInvoiceOnServer } from "./invoices.server";
 import { events, sync } from "./sync.server";
 
 type CreateInvoiceRequest = {
@@ -29,6 +29,14 @@ app.post("/api/mutations/create-invoice", async (context) => {
   return context.json(
     createInvoiceOnServer(request.mutationId, request.input),
   );
+});
+
+app.post("/api/mutations/batch", async (context) => {
+  const request = await context.req.json<{ mutations?: Array<{ id?: unknown; name?: unknown; input?: CreateInvoiceInput }> }>();
+  if (!request?.mutations?.every((mutation) => typeof mutation.id === "string" && mutation.name === "createInvoice" && mutation.input)) {
+    return context.json({ error: "Invalid mutation batch" }, 400);
+  }
+  return context.json({ mutations: createInvoiceBatchOnServer(request.mutations.map((mutation) => ({ id: mutation.id as string, input: mutation.input! }))) });
 });
 
 app.use("*", serveStatic({ root: clientRoot }));

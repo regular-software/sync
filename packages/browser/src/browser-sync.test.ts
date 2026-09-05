@@ -5,7 +5,7 @@ import {
   RetryableMutationError,
   RetryableSyncError,
 } from "@regular-software/sync";
-import { createHttpMutation, createHttpPull } from "./browser-sync";
+import { createHttpMutation, createHttpMutationBatch, createHttpPull } from "./browser-sync";
 
 const request = {
   version: 3,
@@ -30,8 +30,7 @@ test("HTTP pull sends a structured cursor and validates the result", async () =>
         replicaId: "replica-1",
         schemaVersion: 2,
         schemaFingerprint: "fingerprint",
-        rows: [],
-        deleted: [],
+        packets: [],
       });
     },
   });
@@ -123,4 +122,24 @@ test("HTTP mutation applies configured credentials and headers before custom fet
     new Headers(requestedInit?.headers).get("content-type"),
     "application/custom+json",
   );
+});
+
+test("HTTP mutation batch sends ordered mutations and validates acknowledgements", async () => {
+  let body = "";
+  const push = createHttpMutationBatch({
+    url: "https://example.test/api/mutations/batch",
+    fetch: async (_input, init) => {
+      body = String(init?.body);
+      return Response.json({ mutations: [{ id: "m1", version: 7 }, { id: "m2", version: 8 }] });
+    },
+  });
+  const result = await push([
+    { id: "m1", name: "save", input: { value: 1 } },
+    { id: "m2", name: "save", input: { value: 2 } },
+  ]);
+  assert.deepEqual(result, [{ id: "m1", version: 7 }, { id: "m2", version: 8 }]);
+  assert.deepEqual(JSON.parse(body), { mutations: [
+    { id: "m1", name: "save", input: { value: 1 } },
+    { id: "m2", name: "save", input: { value: 2 } },
+  ] });
 });

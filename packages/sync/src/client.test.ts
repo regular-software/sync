@@ -25,7 +25,7 @@ function snapshot(version: number): SyncResult {
 }
 
 function incremental(version: number): SyncResult {
-  return { kind: "incremental", version, ...identity, rows: [], deleted: [] };
+  return { kind: "incremental", version, ...identity, packets: [] };
 }
 
 class MemoryMutationStore implements MutationStore {
